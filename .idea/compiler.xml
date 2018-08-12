@@ -9,8 +9,8 @@
         <module name="mtgvisualdeck" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel>
-      <module name="mtgvisualdeck" target="1.7" />
+    <bytecodeTargetLevel target="1.7">
+      <module name="mtgvisualdeck" target="1.8" />
     </bytecodeTargetLevel>
   </component>
 </project>
