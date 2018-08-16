@@ -6,15 +6,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonReader;
 import com.sunforge.App;
 
-import javax.imageio.ImageIO;
-import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,7 +29,7 @@ public class DecklistParser {
     public static Map<Card, Integer> parse(String givenArea) {
         initJSONS();
         List<String> listOfCards = Arrays.asList(givenArea.split("\n"));
-
+        Map<Card, Integer> parsedCards = new HashMap<>();
         //TODO AKH IS BROKEN SOMEHOW
         System.out.println(Arrays.toString(returnCardTypes(SetsEnum.Sets.AKH, 1)));
 
@@ -45,24 +41,27 @@ public class DecklistParser {
         int planeswalkerNumber = 0;
 
         for (String currentEntry : listOfCards) {
+
             currentEntry = currentEntry.trim();
             //TODO Proper validation
             if (currentEntry.length() > 0) {
 
-
                 int firstIndexSpace = currentEntry.indexOf(" ");
                 int indexOfBracket = currentEntry.indexOf("(");
+
                 int cardQuantity = Integer.parseInt(currentEntry.substring(0, firstIndexSpace));
+
                 String cardName = currentEntry.substring(firstIndexSpace, indexOfBracket - 1);
                 String cardSet = currentEntry.substring(indexOfBracket + 1, currentEntry.indexOf(")"));
                 int cardID = Integer.parseInt(currentEntry.substring(currentEntry.lastIndexOf(" ") + 1));
-                String[] currentCardTypes = returnCardTypes(SetsEnum.Sets.valueOf(cardSet), cardID);
+                String cardManaCost = returnCardManaCost(SetsEnum.Sets.valueOf(cardSet), cardID);
+                String[] cardTypes = returnCardTypes(SetsEnum.Sets.valueOf(cardSet), cardID);
 
+                //Put a card object with quantity
+                parsedCards.put(new CardBuilder().setName(cardName).setSet(cardSet).setNumber(cardID).setManaCost(cardManaCost).setTypes(cardTypes).createCard(), cardQuantity);
 
-                System.out.println(cardQuantity + "," + cardName + "," + cardSet + "," + cardID);
-                System.out.println(Arrays.toString(currentCardTypes));
-
-                for(String currentCardType: currentCardTypes){
+                //Increase counters of card type
+                for(String currentCardType: cardTypes){
                     switch (currentCardType){
                         case "Land":
                             landNumber += cardQuantity;
@@ -86,30 +85,35 @@ public class DecklistParser {
                 }
             }
         }
-        System.out.println("Land: " + landNumber);
-        System.out.println("Artifact: " + artifactNumber);
-        System.out.println("Creature: " + creatureNumber);
-        System.out.println("Sorcery: " + sorceryNumber);
-        System.out.println("Instant: " + instantNumber);
-        System.out.println("Planeswalker: " + planeswalkerNumber);
 
-        BufferedImage myPicture = new BufferedImage(1205, 1450, 1);
-        Graphics2D g = (Graphics2D) myPicture.getGraphics();
-        g.setStroke(new BasicStroke(3));
-        g.setColor(Color.BLUE);
-        g.drawRect(10, 10, myPicture.getWidth() - 20, myPicture.getHeight() - 20);
+        for(Map.Entry<Card, Integer> currentPair: parsedCards.entrySet()){
+            System.out.println("Quantity: " + currentPair.getValue());
+            System.out.println(currentPair.getKey().toString());
+            System.out.println("---------------------------------");
+        }
 
-        String savingPath = null;
+        /*BufferedImage myPicture = new BufferedImage(1205, 1450, 1);
+
+        String pathToCurrentDirectory = null;
         try {
-            savingPath = App.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
-            savingPath = savingPath.substring(1).substring(0, savingPath.lastIndexOf("/"));
-            savingPath += "output.jpg";
-            ImageIO.write(myPicture, "jpg", new File(savingPath));
+            pathToCurrentDirectory = App.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
+            pathToCurrentDirectory = pathToCurrentDirectory.substring(1).substring(0, pathToCurrentDirectory.lastIndexOf("/"));
+
+            BufferedImage testCard = ImageIO.read(new File(pathToCurrentDirectory + "cardImages/AER/1.jpg"));
+            Graphics2D g = (Graphics2D) myPicture.getGraphics();
+            g.drawImage(testCard, 0, 0, null);
+
+            try {
+                String savingPath = pathToCurrentDirectory + "output.jpg";
+                ImageIO.write(myPicture, "jpg", new File(savingPath));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         } catch (URISyntaxException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
-        }
+        }*/
 
         return null;
     }
@@ -137,57 +141,108 @@ public class DecklistParser {
         String[] cardTypes = null;
         switch (givenSet) {
             case M19: {
-                cardTypes = readFromJSON(jsonM19, givenCode);
+                cardTypes = readTypes(jsonM19, givenCode);
                 break;
             }
             case DAR: {
-                cardTypes = readFromJSON(jsonDAR, givenCode);
+                cardTypes = readTypes(jsonDAR, givenCode);
                 break;
             }
             case RIX: {
-                cardTypes = readFromJSON(jsonRIX, givenCode);
+                cardTypes = readTypes(jsonRIX, givenCode);
                 break;
             }
             case XLN: {
-                cardTypes = readFromJSON(jsonXLN, givenCode-1);
+                cardTypes = readTypes(jsonXLN, givenCode-1);
                 break;
             }
             case HOU: {
-                cardTypes = readFromJSON(jsonHOU, givenCode);
+                cardTypes = readTypes(jsonHOU, givenCode);
                 break;
             }
             case AKH: {
-                cardTypes = readFromJSON(jsonAKH, givenCode);
+                cardTypes = readTypes(jsonAKH, givenCode);
                 break;
             }
             case AER: {
-                cardTypes = readFromJSON(jsonAER, givenCode);
+                cardTypes = readTypes(jsonAER, givenCode);
                 break;
             }
             case KLD: {
-                cardTypes = readFromJSON(jsonKLD, givenCode);
+                cardTypes = readTypes(jsonKLD, givenCode);
                 break;
             }
             case W17: {
-                cardTypes = readFromJSON(jsonW17, givenCode);
+                cardTypes = readTypes(jsonW17, givenCode);
                 break;
             }
         }
 
         return cardTypes;
     }
+    private static String returnCardManaCost(SetsEnum.Sets givenSet, int givenCode) {
+        String cardManaCost = null;
+        switch (givenSet) {
+            case M19: {
+                cardManaCost = readManaCost(jsonM19, givenCode);
+                break;
+            }
+            case DAR: {
+                cardManaCost = readManaCost(jsonDAR, givenCode);
+                break;
+            }
+            case RIX: {
+                cardManaCost = readManaCost(jsonRIX, givenCode);
+                break;
+            }
+            case XLN: {
+                cardManaCost = readManaCost(jsonXLN, givenCode-1);
+                break;
+            }
+            case HOU: {
+                cardManaCost = readManaCost(jsonHOU, givenCode);
+                break;
+            }
+            case AKH: {
+                cardManaCost = readManaCost(jsonAKH, givenCode);
+                break;
+            }
+            case AER: {
+                cardManaCost = readManaCost(jsonAER, givenCode);
+                break;
+            }
+            case KLD: {
+                cardManaCost = readManaCost(jsonKLD, givenCode);
+                break;
+            }
+            case W17: {
+                cardManaCost = readManaCost(jsonW17, givenCode);
+                break;
+            }
+        }
 
-    private static String[] readFromJSON(String givenPathToJSON, int givenCode) {
+        return cardManaCost;
+    }
+
+    private static String[] readTypes(String givenPathToJSON, int givenCode){
+        return readFromJSONArray(givenPathToJSON, "types", givenCode);
+    }
+
+    private static String readManaCost(String givenPathToJson, int givenCode){
+        return readFromJSONPrimitive(givenPathToJson, "manaCost", givenCode);
+    }
+
+    private static String[] readFromJSONArray(String givenPathToJSON, String fieldName, int givenCode) {
         Gson gson = new Gson();
         JsonReader jsonReader;
         try {
             jsonReader = gson.newJsonReader(new FileReader(givenPathToJSON));
             jsonReader.setLenient(true);
             JsonObject jsonObject = gson.fromJson(jsonReader, JsonObject.class);
-            JsonArray typesJson = jsonObject.getAsJsonArray("cards").get(givenCode - 1).getAsJsonObject().get("types").getAsJsonArray();
-            String[] cardTypes = new String[typesJson.size()];
-            for (int currentIndex = 0; currentIndex < typesJson.size(); currentIndex++) {
-                cardTypes[currentIndex] = typesJson.get(currentIndex).getAsString();
+            JsonArray resultArray = jsonObject.getAsJsonArray("cards").get(givenCode - 1).getAsJsonObject().get(fieldName).getAsJsonArray();
+            String[] cardTypes = new String[resultArray.size()];
+            for (int currentIndex = 0; currentIndex < resultArray.size(); currentIndex++) {
+                cardTypes[currentIndex] = resultArray.get(currentIndex).getAsString();
             }
             return cardTypes;
 
@@ -195,5 +250,22 @@ public class DecklistParser {
             e.printStackTrace();
         }
         return new String[]{};
+    }
+
+    private static String readFromJSONPrimitive(String givenPathToJSON, String fieldName, int givenCode) {
+        Gson gson = new Gson();
+        JsonReader jsonReader;
+        try {
+            jsonReader = gson.newJsonReader(new FileReader(givenPathToJSON));
+            jsonReader.setLenient(true);
+            JsonObject jsonObject = gson.fromJson(jsonReader, JsonObject.class);
+            JsonObject resultObject = jsonObject.getAsJsonArray("cards").get(givenCode - 1).getAsJsonObject().get(fieldName).getAsJsonObject();
+
+            return resultObject.getAsString();
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return "";
     }
 }
