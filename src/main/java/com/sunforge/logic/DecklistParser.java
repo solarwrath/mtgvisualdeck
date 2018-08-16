@@ -13,6 +13,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class DecklistParser {
 
@@ -26,12 +28,15 @@ public class DecklistParser {
     private static String jsonKLD = null;
     private static String jsonW17 = null;
 
+    private static Logger log = Logger.getLogger(DecklistParser.class.getName());
+
     public static Map<Card, Integer> parse(String givenArea) {
         initJSONS();
+        log.info("Initted json");
+
         List<String> listOfCards = Arrays.asList(givenArea.split("\n"));
         Map<Card, Integer> parsedCards = new HashMap<>();
         //TODO AKH IS BROKEN SOMEHOW
-        System.out.println(Arrays.toString(returnCardTypes(SetsEnum.Sets.AKH, 1)));
 
         int landNumber = 0;
         int artifactNumber = 0;
@@ -39,6 +44,8 @@ public class DecklistParser {
         int sorceryNumber = 0;
         int instantNumber = 0;
         int planeswalkerNumber = 0;
+
+        log.info("Started consuming the data from given decklist");
 
         for (String currentEntry : listOfCards) {
 
@@ -57,12 +64,16 @@ public class DecklistParser {
                 String cardManaCost = returnCardManaCost(SetsEnum.Sets.valueOf(cardSet), cardID);
                 String[] cardTypes = returnCardTypes(SetsEnum.Sets.valueOf(cardSet), cardID);
 
+                log.info("Parsed the data from given card");
+
                 //Put a card object with quantity
                 parsedCards.put(new CardBuilder().setName(cardName).setSet(cardSet).setNumber(cardID).setManaCost(cardManaCost).setTypes(cardTypes).createCard(), cardQuantity);
 
+                log.info("Created a pair in map");
+
                 //Increase counters of card type
-                for(String currentCardType: cardTypes){
-                    switch (currentCardType){
+                for (String currentCardType : cardTypes) {
+                    switch (currentCardType) {
                         case "Land":
                             landNumber += cardQuantity;
                             break;
@@ -86,7 +97,9 @@ public class DecklistParser {
             }
         }
 
-        for(Map.Entry<Card, Integer> currentPair: parsedCards.entrySet()){
+        log.info("Finished consuming the data from the given decklist");
+
+        for (Map.Entry<Card, Integer> currentPair : parsedCards.entrySet()) {
             System.out.println("Quantity: " + currentPair.getValue());
             System.out.println(currentPair.getKey().toString());
             System.out.println("---------------------------------");
@@ -133,6 +146,7 @@ public class DecklistParser {
             jsonKLD = pathToJARDir + "jsons/kld.json";
             jsonW17 = pathToJARDir + "jsons/w17.json";
         } catch (URISyntaxException e) {
+            log.log(Level.SEVERE, "Can't find such path. Probably, URI is wrong.", e);
             e.printStackTrace();
         }
     }
@@ -153,7 +167,7 @@ public class DecklistParser {
                 break;
             }
             case XLN: {
-                cardTypes = readTypes(jsonXLN, givenCode-1);
+                cardTypes = readTypes(jsonXLN, givenCode - 1);
                 break;
             }
             case HOU: {
@@ -180,6 +194,7 @@ public class DecklistParser {
 
         return cardTypes;
     }
+
     private static String returnCardManaCost(SetsEnum.Sets givenSet, int givenCode) {
         String cardManaCost = null;
         switch (givenSet) {
@@ -196,7 +211,7 @@ public class DecklistParser {
                 break;
             }
             case XLN: {
-                cardManaCost = readManaCost(jsonXLN, givenCode-1);
+                cardManaCost = readManaCost(jsonXLN, givenCode - 1);
                 break;
             }
             case HOU: {
@@ -224,11 +239,11 @@ public class DecklistParser {
         return cardManaCost;
     }
 
-    private static String[] readTypes(String givenPathToJSON, int givenCode){
+    private static String[] readTypes(String givenPathToJSON, int givenCode) {
         return readFromJSONArray(givenPathToJSON, "types", givenCode);
     }
 
-    private static String readManaCost(String givenPathToJson, int givenCode){
+    private static String readManaCost(String givenPathToJson, int givenCode) {
         return readFromJSONPrimitive(givenPathToJson, "manaCost", givenCode);
     }
 
@@ -247,23 +262,26 @@ public class DecklistParser {
             return cardTypes;
 
         } catch (FileNotFoundException e) {
+            log.log(Level.SEVERE, "There is no such file.", e);
             e.printStackTrace();
         }
         return new String[]{};
     }
 
     private static String readFromJSONPrimitive(String givenPathToJSON, String fieldName, int givenCode) {
+        System.out.println(givenCode + ", " + givenPathToJSON);
         Gson gson = new Gson();
         JsonReader jsonReader;
         try {
             jsonReader = gson.newJsonReader(new FileReader(givenPathToJSON));
             jsonReader.setLenient(true);
             JsonObject jsonObject = gson.fromJson(jsonReader, JsonObject.class);
-            JsonObject resultObject = jsonObject.getAsJsonArray("cards").get(givenCode - 1).getAsJsonObject().get(fieldName).getAsJsonObject();
-
-            return resultObject.getAsString();
-
+            return jsonObject.getAsJsonArray("cards").get(givenCode - 1).getAsJsonObject().get(fieldName).getAsString();
         } catch (FileNotFoundException e) {
+            log.log(Level.SEVERE, "There is no such file.", e);
+            e.printStackTrace();
+        } catch (NullPointerException e) {
+            log.log(Level.WARNING, "There is no such field.", e);
             e.printStackTrace();
         }
         return "";
