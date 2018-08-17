@@ -9,10 +9,7 @@ import com.sunforge.App;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.net.URISyntaxException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -35,7 +32,11 @@ public class DecklistParser {
         log.info("Initted json");
 
         List<String> listOfCards = Arrays.asList(givenArea.split("\n"));
-        Map<Card, Integer> parsedCards = new HashMap<>();
+
+
+        //TODO Create a special class to implement this. Also additional check for artifact/sorcery/instant/pw/lands
+        SortedMap<Card, Integer> parsedCards = new TreeMap<>(Comparator.reverseOrder());
+
         //TODO AKH IS BROKEN SOMEHOW
 
         int landNumber = 0;
@@ -279,10 +280,8 @@ public class DecklistParser {
             return jsonObject.getAsJsonArray("cards").get(givenCode - 1).getAsJsonObject().get(fieldName).getAsString();
         } catch (FileNotFoundException e) {
             log.log(Level.SEVERE, "There is no such file.", e);
-            e.printStackTrace();
         } catch (NullPointerException e) {
             log.log(Level.WARNING, "There is no such field.", e);
-            e.printStackTrace();
         }
         return "";
     }

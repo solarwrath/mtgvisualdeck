@@ -20,7 +20,6 @@ public class App extends Application {
         App.mainStage = mainStage;
     }
 
-
     public static void main(String[] args) {
         launch(args);
     }
