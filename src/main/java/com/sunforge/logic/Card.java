@@ -52,6 +52,14 @@ public class Card implements Comparable<Card> {
         this.number = number;
     }
 
+    public int getCmc() {
+        return cmc;
+    }
+
+    public void setCmc(int cmc) {
+        this.cmc = cmc;
+    }
+
     public String getManaCost() {
         return manaCost;
     }
@@ -68,22 +76,24 @@ public class Card implements Comparable<Card> {
         this.types = types;
     }
 
-    public Card(String name, String set, int number, String manaCost, String[] types) {
+    public Card(String name, String set, int number, int cmc, String manaCost, String[] types) {
         this.name = name;
         this.set = set;
         this.number = number;
+        this.cmc = cmc;
         this.manaCost = manaCost;
         this.types = types;
     }
 
     @Override
     public String toString() {
-        return "Card object{\nName: " + name + "\nSet; " + set + "\nNumber: " + number + "\nManaCost: " + manaCost + "\nCard types: " + Arrays.toString(types);
+        return "Card object{\nName: " + name + "\nSet; " + set + "\nNumber: " + number + "\nCMC: " + cmc + "\nManaCost: " + manaCost + "\nCard types: " + Arrays.toString(types);
     }
 
     @Override
     public int compareTo(Card card2) {
 
+        //Sorting by weight (Creature - Instant - Sorcery - Artifact - Planeswalker - Land)
         int weightCurrent = getTheBiggestType(this);
         int weightGiven = getTheBiggestType(card2);
 
@@ -94,14 +104,28 @@ public class Card implements Comparable<Card> {
             return -1;
         }
 
-        //TODO MANACOST ORDERING ADDITIONALY
+        //Sorting by CMC
+
+        if(this.cmc > card2.cmc){
+            return -1;
+        }
+
+        if(this.cmc < card2.cmc){
+            return 1;
+        }
+
+        //Sort by alphabetical order (weird) case insesnsetive
 
         return -this.name.compareToIgnoreCase(card2.name);
     }
 
     private static int getTheBiggestType(Card givenCard) {
+
+        //To each type is given weight: cards with higher weight will be listed map earlier
+
         int max = 0;
         String[] cardTypes = givenCard.types;
+
         for (String currentType : cardTypes) {
             int currentWeight = 0;
             switch (currentType) {
@@ -128,8 +152,11 @@ public class Card implements Comparable<Card> {
                     log.log(Level.SEVERE, "Error in getting the weight of type: " + currentType, illegalArgument);
                     break;
             }
+
             max = Math.max(max, currentWeight);
         }
+
         return max;
     }
+
 }

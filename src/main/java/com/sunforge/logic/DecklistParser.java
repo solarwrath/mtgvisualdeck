@@ -33,7 +33,6 @@ public class DecklistParser {
 
         List<String> listOfCards = Arrays.asList(givenArea.split("\n"));
 
-
         //TODO Create a special class to implement this. Also additional check for artifact/sorcery/instant/pw/lands
         SortedMap<Card, Integer> parsedCards = new TreeMap<>(Comparator.reverseOrder());
 
@@ -62,13 +61,14 @@ public class DecklistParser {
                 String cardName = currentEntry.substring(firstIndexSpace, indexOfBracket - 1);
                 String cardSet = currentEntry.substring(indexOfBracket + 1, currentEntry.indexOf(")"));
                 int cardID = Integer.parseInt(currentEntry.substring(currentEntry.lastIndexOf(" ") + 1));
+                int cardCMC = returnCardCMC(SetsEnum.Sets.valueOf(cardSet), cardID);
                 String cardManaCost = returnCardManaCost(SetsEnum.Sets.valueOf(cardSet), cardID);
                 String[] cardTypes = returnCardTypes(SetsEnum.Sets.valueOf(cardSet), cardID);
 
                 log.info("Parsed the data from given card");
 
                 //Put a card object with quantity
-                parsedCards.put(new CardBuilder().setName(cardName).setSet(cardSet).setNumber(cardID).setManaCost(cardManaCost).setTypes(cardTypes).createCard(), cardQuantity);
+                parsedCards.put(new CardBuilder().setName(cardName).setSet(cardSet).setNumber(cardID).setCMC(cardCMC).setManaCost(cardManaCost).setTypes(cardTypes).createCard(), cardQuantity);
 
                 log.info("Created a pair in map");
 
@@ -100,34 +100,16 @@ public class DecklistParser {
 
         log.info("Finished consuming the data from the given decklist");
 
-        for (Map.Entry<Card, Integer> currentPair : parsedCards.entrySet()) {
-            System.out.println("Quantity: " + currentPair.getValue());
-            System.out.println(currentPair.getKey().toString());
-            System.out.println("---------------------------------");
-        }
-
-        /*BufferedImage myPicture = new BufferedImage(1205, 1450, 1);
-
-        String pathToCurrentDirectory = null;
+        String pathToJARDir = null;
         try {
-            pathToCurrentDirectory = App.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
-            pathToCurrentDirectory = pathToCurrentDirectory.substring(1).substring(0, pathToCurrentDirectory.lastIndexOf("/"));
-
-            BufferedImage testCard = ImageIO.read(new File(pathToCurrentDirectory + "cardImages/AER/1.jpg"));
-            Graphics2D g = (Graphics2D) myPicture.getGraphics();
-            g.drawImage(testCard, 0, 0, null);
-
-            try {
-                String savingPath = pathToCurrentDirectory + "output.jpg";
-                ImageIO.write(myPicture, "jpg", new File(savingPath));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            log.info("Getting the path to current dir");
+            pathToJARDir = App.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
+            pathToJARDir = pathToJARDir.substring(1).substring(0, pathToJARDir.lastIndexOf("/"));
+            ImageCreator.createOutput(pathToJARDir+"output.jpg", parsedCards);
         } catch (URISyntaxException e) {
+            log.log(Level.SEVERE, "Problem with path to current dir. Probably wrong formatting", e);
             e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }*/
+        }
 
         return null;
     }
@@ -196,6 +178,50 @@ public class DecklistParser {
         return cardTypes;
     }
 
+    private static int returnCardCMC(SetsEnum.Sets givenSet, int givenCode) {
+        int cardCMC = 0;
+        switch (givenSet) {
+            case M19: {
+                cardCMC = readCMC(jsonM19, givenCode);
+                break;
+            }
+            case DAR: {
+                cardCMC = readCMC(jsonDAR, givenCode);
+                break;
+            }
+            case RIX: {
+                cardCMC = readCMC(jsonRIX, givenCode);
+                break;
+            }
+            case XLN: {
+                cardCMC = readCMC(jsonXLN, givenCode - 1);
+                break;
+            }
+            case HOU: {
+                cardCMC = readCMC(jsonHOU, givenCode);
+                break;
+            }
+            case AKH: {
+                cardCMC = readCMC(jsonAKH, givenCode);
+                break;
+            }
+            case AER: {
+                cardCMC = readCMC(jsonAER, givenCode);
+                break;
+            }
+            case KLD: {
+                cardCMC = readCMC(jsonKLD, givenCode);
+                break;
+            }
+            case W17: {
+                cardCMC = readCMC(jsonW17, givenCode);
+                break;
+            }
+        }
+
+        return cardCMC;
+    }
+
     private static String returnCardManaCost(SetsEnum.Sets givenSet, int givenCode) {
         String cardManaCost = null;
         switch (givenSet) {
@@ -244,8 +270,12 @@ public class DecklistParser {
         return readFromJSONArray(givenPathToJSON, "types", givenCode);
     }
 
+    private static int readCMC(String givenPathToJson, int givenCode) {
+        return readFromJSONPrimitiveInteger(givenPathToJson, "cmc", givenCode);
+    }
+
     private static String readManaCost(String givenPathToJson, int givenCode) {
-        return readFromJSONPrimitive(givenPathToJson, "manaCost", givenCode);
+        return readFromJSONPrimitiveString(givenPathToJson, "manaCost", givenCode);
     }
 
     private static String[] readFromJSONArray(String givenPathToJSON, String fieldName, int givenCode) {
@@ -269,8 +299,7 @@ public class DecklistParser {
         return new String[]{};
     }
 
-    private static String readFromJSONPrimitive(String givenPathToJSON, String fieldName, int givenCode) {
-        System.out.println(givenCode + ", " + givenPathToJSON);
+    private static String readFromJSONPrimitiveString(String givenPathToJSON, String fieldName, int givenCode) {
         Gson gson = new Gson();
         JsonReader jsonReader;
         try {
@@ -284,5 +313,21 @@ public class DecklistParser {
             log.log(Level.WARNING, "There is no such field.", e);
         }
         return "";
+    }
+
+    private static int readFromJSONPrimitiveInteger(String givenPathToJSON, String fieldName, int givenCode) {
+        Gson gson = new Gson();
+        JsonReader jsonReader;
+        try {
+            jsonReader = gson.newJsonReader(new FileReader(givenPathToJSON));
+            jsonReader.setLenient(true);
+            JsonObject jsonObject = gson.fromJson(jsonReader, JsonObject.class);
+            return jsonObject.getAsJsonArray("cards").get(givenCode - 1).getAsJsonObject().get(fieldName).getAsInt();
+        } catch (FileNotFoundException e) {
+            log.log(Level.SEVERE, "There is no such file.", e);
+        } catch (NullPointerException e) {
+            log.log(Level.WARNING, "There is no such field.", e);
+        }
+        return 0;
     }
 }

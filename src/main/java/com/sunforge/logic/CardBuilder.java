@@ -1,11 +1,12 @@
 package com.sunforge.logic;
 
 public class CardBuilder {
-    private String manaCost;
     private String name;
-    private int number;
-    private String[] types;
     private String set;
+    private int number;
+    private int cmc;
+    private String manaCost;
+    private String[] types;
 
     public CardBuilder setName(String name) {
         this.name = name;
@@ -22,6 +23,11 @@ public class CardBuilder {
         return this;
     }
 
+    public CardBuilder setCMC(int cmc) {
+        this.cmc = cmc;
+        return this;
+    }
+
     public CardBuilder setManaCost(String manaCost) {
         this.manaCost = manaCost;
         return this;
@@ -33,6 +39,6 @@ public class CardBuilder {
     }
 
     public Card createCard() {
-        return new Card(name, set, number, manaCost, types);
+        return new Card(name, set, number, cmc, manaCost, types);
     }
 }
