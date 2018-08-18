@@ -17,7 +17,11 @@ import java.util.logging.Logger;
 public class ImageCreator {
     private static Logger log = Logger.getLogger(ImageCreator.class.getName());
 
+    //TODO SEPARATE TO IMPLEMENT DRWAING SIDEBOARD TITLE AND STATS
+
     public static void createOutput(String pathToOutput, SortedMap<Card, Integer> givenMapOfCards) {
+
+
         BufferedImage myPicture = new BufferedImage(3000, 3000, 1);
 
         String pathToCurrentDirectory;
@@ -53,7 +57,7 @@ public class ImageCreator {
 
                     //Get image from file
 
-                    currentIteratedCardImage = ImageIO.read(new File(pathToCurrentDirectory + "cardImages/" + currentCard.getSet() + "/" + currentCard.getNumber() + ".jpg"));
+                    currentIteratedCardImage = ImageIO.read(new File(pathToCurrentDirectory + "cardImages/" + currentCard.getSet() + "/" + currentCard.getNumber() + ".png"));
 
                     //Calculate initial position. Because original files are not beautifully sized those parameters are not too.
                     currentX = calculateX(currentCol);
@@ -65,7 +69,7 @@ public class ImageCreator {
 
                         g.drawImage(currentIteratedCardImage, currentX, currentY, null);
 
-                        //Move next image, so that it stacks
+                        //Move next image, so that it stacks. 39 is the proper height of card name
 
                         currentY += 39;
                         cardsInCell++;

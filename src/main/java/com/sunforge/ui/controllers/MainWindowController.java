@@ -1,7 +1,7 @@
 package com.sunforge.ui.controllers;
 
 import com.sunforge.App;
-import com.sunforge.logic.DecklistParser;
+import com.sunforge.logic.Manager;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
@@ -49,7 +49,7 @@ public class MainWindowController {
         });
 
         generateButton.setOnAction(event -> {
-            DecklistParser.parse(decklistTextArea.getText());
+            Manager.processData(decklistTextArea.getText());
         });
 
     }
