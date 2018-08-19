@@ -20,14 +20,26 @@
             <TextArea fx:id="decklistTextArea" layoutY="18.0" prefHeight="470.0" prefWidth="260.0" />
          </children>
       </AnchorPane>
-      <Button fx:id="savePathButton" layoutX="534.0" layoutY="95.0" mnemonicParsing="false" text="Choose" textFill="#333333" />
       <AnchorPane layoutX="330.0" layoutY="77.0">
          <children>
             <Label text="Path to save:" textFill="#333333" />
             <TextField fx:id="savePathField" layoutY="18.0" prefHeight="25.0" prefWidth="200.0" />
          </children>
       </AnchorPane>
-      <Button fx:id="generateButton" layoutX="330.0" layoutY="140.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="150.0" text="Generate" textFill="#333333">
+      <Button fx:id="savePathButton" layoutX="534.0" layoutY="95.0" mnemonicParsing="false" text="Choose" textFill="#333333" />
+      <AnchorPane layoutX="330.0" layoutY="126.0">
+         <children>
+            <Label text="Title: - optional" textFill="#333333" />
+            <TextField fx:id="titleField" layoutY="18.0" prefHeight="25.0" prefWidth="200.0" />
+         </children>
+      </AnchorPane>
+      <AnchorPane layoutX="330.0" layoutY="175.0">
+         <children>
+            <Label text="Author:  - optional" textFill="#333333" />
+            <TextField fx:id="authorField" layoutY="18.0" prefHeight="25.0" prefWidth="200.0" />
+         </children>
+      </AnchorPane>
+      <Button fx:id="generateButton" layoutX="330.0" layoutY="228.0" mnemonicParsing="false" prefHeight="30.0" prefWidth="150.0" text="Generate" textFill="#333333">
          <font>
             <Font size="14.0" />
          </font>

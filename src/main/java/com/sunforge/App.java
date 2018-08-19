@@ -29,6 +29,7 @@ public class App extends Application {
         setMainStage(primaryStage);
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/ui/fxml/mainWindow.fxml"));
         Parent root = (Parent) loader.load();
+        root.getStylesheets().add(getClass().getResource("/ui/css/general.css").toExternalForm());
         mainStage.setTitle("MtG: Deck Visualizer");
         mainStage.setScene(new Scene(root));
         mainStage.show();

@@ -13,7 +13,7 @@ import static com.sunforge.logic.DecklistParser.parse;
 public class Manager {
 
     private static Logger log = Logger.getLogger(Manager.class.getName());
-    public static void processData(String givenDeck){
+    public static void processData(String givenDeck, String givenTitle, String givenAuthor){
 
         //Splitting the deck into main and side boards. 0 is mainboard. 1 is sideboard.
         List<String> mainBoard = DeckSplitter.splitDeck(givenDeck).get(0);

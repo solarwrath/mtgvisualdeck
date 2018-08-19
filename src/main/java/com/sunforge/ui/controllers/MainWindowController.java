@@ -11,6 +11,9 @@ import javafx.stage.FileChooser;
 import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
+import java.util.logging.Logger;
+
+import static com.sunforge.logic.Validator.isValidFilePath;
 
 public class MainWindowController {
 
@@ -30,7 +33,15 @@ public class MainWindowController {
     private Button savePathButton;
 
     @FXML
+    private TextField titleField;
+
+    @FXML
+    private TextField authorField;
+
+    @FXML
     private Button generateButton;
+
+    private static Logger log = Logger.getLogger(MainWindowController.class.getName());
 
     @FXML
     void initialize() {
@@ -41,15 +52,29 @@ public class MainWindowController {
 
         savePathButton.setOnAction(event -> {
             FileChooser fileChooser = new FileChooser();
-            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text format", "*.txt"));
+            fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JPG", "*.jpg"));
             File saveToFile = fileChooser.showSaveDialog(App.getMainStage());
-            if (saveToFile != null){
+            if (saveToFile != null) {
                 savePathField.setText(saveToFile.getAbsolutePath());
+                log.info("User chose save path");
             }
         });
 
         generateButton.setOnAction(event -> {
-            Manager.processData(decklistTextArea.getText());
+
+            //Validation
+
+            if (isValidFilePath(savePathField.getText())) {
+                savePathField.setPromptText("");
+                savePathField.getStyleClass().remove("error");
+                log.info("Save path passed the validation");
+                Manager.processData(decklistTextArea.getText(), titleField.getText(), authorField.getText());
+            } else {
+                savePathField.setPromptText("Invalid file path!");
+                savePathField.getStyleClass().add("error");
+                log.warning("Users save path was wrong");
+            }
+
         });
 
     }
