@@ -285,8 +285,12 @@ public class DecklistParser {
         } catch (FileNotFoundException e) {
             log.log(Level.SEVERE, "There is no such file.", e);
         } catch (NullPointerException e) {
-            //TODO Check for land
-            log.log(Level.WARNING, "There is no such field.", e);
+
+            //Checking if trying to get manaCost of land, because that is not an appropriate error to log
+            //Only for manaCost because now using this method only to get it. Later expand if needed, which is unlikely
+            if(!(readTypes(givenPathToJSON, givenCode).contains(CardType.LAND) && fieldName.equals("manaCost"))){
+                log.log(Level.WARNING, "There is no such field.", e);
+            }
         }
         return "";
     }
