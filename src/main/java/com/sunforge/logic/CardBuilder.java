@@ -1,19 +1,21 @@
 package com.sunforge.logic;
 
+import java.util.Set;
+
 public class CardBuilder {
     private String name;
-    private String set;
+    private SetType set;
     private int number;
     private int cmc;
     private String manaCost;
-    private String[] types;
+    private Set<CardType> types;
 
     public CardBuilder setName(String name) {
         this.name = name;
         return this;
     }
 
-    public CardBuilder setSet(String set) {
+    public CardBuilder setSet(SetType set) {
         this.set = set;
         return this;
     }
@@ -33,7 +35,7 @@ public class CardBuilder {
         return this;
     }
 
-    public CardBuilder setTypes(String[] types) {
+    public CardBuilder setTypes(Set<CardType> types) {
         this.types = types;
         return this;
     }

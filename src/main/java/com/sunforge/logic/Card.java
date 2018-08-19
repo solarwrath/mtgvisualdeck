@@ -1,15 +1,15 @@
 package com.sunforge.logic;
 
 import java.util.Arrays;
-import java.util.logging.Level;
+import java.util.Set;
 import java.util.logging.Logger;
 
 public class Card implements Comparable<Card> {
     private String name;
-    private String set;
+    private SetType set;
     private int number;
     private String manaCost;
-    private String[] types;
+    private Set<CardType> types;
 
     private String artist;
     private int cmc;
@@ -36,11 +36,11 @@ public class Card implements Comparable<Card> {
         this.name = name;
     }
 
-    public String getSet() {
+    public SetType getSet() {
         return set;
     }
 
-    public void setSet(String set) {
+    public void setSet(SetType set) {
         this.set = set;
     }
 
@@ -68,15 +68,15 @@ public class Card implements Comparable<Card> {
         this.manaCost = manaCost;
     }
 
-    public String[] getTypes() {
+    public Set<CardType> getTypes() {
         return types;
     }
 
-    public void setTypes(String[] types) {
+    public void setTypes(Set<CardType> types) {
         this.types = types;
     }
 
-    public Card(String name, String set, int number, int cmc, String manaCost, String[] types) {
+    public Card(String name, SetType set, int number, int cmc, String manaCost, Set<CardType> types) {
         this.name = name;
         this.set = set;
         this.number = number;
@@ -87,7 +87,7 @@ public class Card implements Comparable<Card> {
 
     @Override
     public String toString() {
-        return "Card object{\nName: " + name + "\nSet; " + set + "\nNumber: " + number + "\nCMC: " + cmc + "\nManaCost: " + manaCost + "\nCard types: " + Arrays.toString(types);
+        return "Card object{\nName: " + name + "\nSet; " + set.toString() + "\nNumber: " + number + "\nCMC: " + cmc + "\nManaCost: " + manaCost + "\nCard types: " + Arrays.toString(types.toArray());
     }
 
     @Override
@@ -124,11 +124,13 @@ public class Card implements Comparable<Card> {
         //To each type is given weight: cards with higher weight will be listed map earlier
 
         int max = 0;
-        String[] cardTypes = givenCard.types;
-
+       /* Set<CardType> cardTypes = givenCard.types;
+        for (CardType currentType : cardTypes) {
+            currentType.toString()
+        }
         for (String currentType : cardTypes) {
             int currentWeight = 0;
-            switch (currentType) {
+            switch (currentType.) {
                 case "Creature":
                     currentWeight = 6;
                     break;
@@ -154,7 +156,7 @@ public class Card implements Comparable<Card> {
             }
 
             max = Math.max(max, currentWeight);
-        }
+        }*/
 
         return max;
     }

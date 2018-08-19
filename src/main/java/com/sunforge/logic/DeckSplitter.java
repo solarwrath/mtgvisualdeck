@@ -26,7 +26,7 @@ public class DeckSplitter {
             }
         }
 
-        //Unftortunately, Java doesn't really offer us appropriate usage of Generics in Array, so need to use collections
+        //Unfortunately, Java doesn't really offer us appropriate usage of Generics in Array, so need to use collections
         List<List<String>> result = new ArrayList<>();
         result.add(mainBoard);
         result.add(sideBoard);

@@ -27,11 +27,9 @@ public class DecklistParser {
 
     private static Logger log = Logger.getLogger(DecklistParser.class.getName());
 
-    public static Map<Card, Integer> parse(String givenArea) {
+    public static Map<Card, Integer> parse(List<String> listOfCards) {
         initJSONS();
         log.info("Initted json");
-
-        List<String> listOfCards = Arrays.asList(givenArea.split("\n"));
 
         //TODO Create a special class to implement this. Also additional check for artifact/sorcery/instant/pw/lands
         SortedMap<Card, Integer> parsedCards = new TreeMap<>(Comparator.reverseOrder());
@@ -59,11 +57,11 @@ public class DecklistParser {
                 int cardQuantity = Integer.parseInt(currentEntry.substring(0, firstIndexSpace));
 
                 String cardName = currentEntry.substring(firstIndexSpace, indexOfBracket - 1);
-                String cardSet = currentEntry.substring(indexOfBracket + 1, currentEntry.indexOf(")"));
+                SetType cardSet = SetType.valueOf(currentEntry.substring(indexOfBracket + 1, currentEntry.indexOf(")")));
                 int cardID = Integer.parseInt(currentEntry.substring(currentEntry.lastIndexOf(" ") + 1));
-                int cardCMC = returnCardCMC(SetsEnum.Sets.valueOf(cardSet), cardID);
-                String cardManaCost = returnCardManaCost(SetsEnum.Sets.valueOf(cardSet), cardID);
-                String[] cardTypes = returnCardTypes(SetsEnum.Sets.valueOf(cardSet), cardID);
+                int cardCMC = returnCardCMC(cardSet, cardID);
+                String cardManaCost = returnCardManaCost(cardSet, cardID);
+                Set<CardType> cardTypes = returnCardTypes(cardSet, cardID);
 
                 log.info("Parsed the data from given card");
 
@@ -73,45 +71,62 @@ public class DecklistParser {
                 log.info("Created a pair in map");
 
                 //Increase counters of card type
-                for (String currentCardType : cardTypes) {
-                    switch (currentCardType) {
-                        case "Land":
-                            landNumber += cardQuantity;
-                            break;
-                        case "Artifact":
-                            artifactNumber += cardQuantity;
-                            break;
-                        case "Creature":
-                            creatureNumber += cardQuantity;
-                            break;
-                        case "Sorcery":
-                            sorceryNumber += cardQuantity;
-                            break;
-                        case "Instant":
-                            instantNumber += cardQuantity;
-                            break;
-                        case "Planeswalker":
-                            planeswalkerNumber += cardQuantity;
-                            break;
-                    }
-                }
             }
         }
 
         log.info("Finished consuming the data from the given decklist");
 
-        String pathToJARDir = null;
-        try {
-            log.info("Getting the path to current dir");
-            pathToJARDir = App.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
-            pathToJARDir = pathToJARDir.substring(1).substring(0, pathToJARDir.lastIndexOf("/"));
-            ImageCreator.createOutput(pathToJARDir+"output.jpg", parsedCards);
-        } catch (URISyntaxException e) {
-            log.log(Level.SEVERE, "Problem with path to current dir. Probably wrong formatting", e);
-            e.printStackTrace();
-        }
+        return parsedCards;
+    }
 
-        return null;
+    public static Map<CardType, Integer> getTypesFromDeck(SortedMap<Card, Integer> givenMap) {
+
+        //No inline initializing for Map in Java 8 that is the latest for JavaFX wrapper, unfortunately, so need to
+        //add items manually
+        Map<CardType, Integer> analyzedTypes = new HashMap<CardType, Integer>();
+
+        analyzedTypes.put(CardType.CREATURE, 0);
+        analyzedTypes.put(CardType.INSTANT, 0);
+        analyzedTypes.put(CardType.SORCERY, 0);
+        analyzedTypes.put(CardType.ARTIFACT, 0);
+        analyzedTypes.put(CardType.ENCHANTMENT, 0);
+        analyzedTypes.put(CardType.PLANESWALKER, 0);
+        analyzedTypes.put(CardType.LAND, 0);
+
+        for (Map.Entry<Card, Integer> currentPair : givenMap.entrySet()) {
+            for (CardType currentCardType : currentPair.getKey().getTypes()) {
+                //S
+                if (currentCardType.equals(CardType.CREATURE)) {
+                    analyzedTypes.replace(CardType.CREATURE, analyzedTypes.get(CardType.CREATURE) + 1);
+                    break;
+                }
+                if (currentCardType.equals(CardType.INSTANT)) {
+                    analyzedTypes.replace(CardType.INSTANT, analyzedTypes.get(CardType.INSTANT) + 1);
+                    break;
+                }
+                if (currentCardType.equals(CardType.SORCERY)) {
+                    analyzedTypes.replace(CardType.SORCERY, analyzedTypes.get(CardType.SORCERY) + 1);
+                    break;
+                }
+                if (currentCardType.equals(CardType.ENCHANTMENT)) {
+                    analyzedTypes.replace(CardType.ENCHANTMENT, analyzedTypes.get(CardType.ENCHANTMENT) + 1);
+                    break;
+                }
+                if (currentCardType.equals(CardType.ARTIFACT)) {
+                    analyzedTypes.replace(CardType.ARTIFACT, analyzedTypes.get(CardType.ARTIFACT) + 1);
+                    break;
+                }
+                if (currentCardType.equals(CardType.PLANESWALKER)) {
+                    analyzedTypes.replace(CardType.PLANESWALKER, analyzedTypes.get(CardType.PLANESWALKER) + 1);
+                    break;
+                }
+                if (currentCardType.equals(CardType.LAND)) {
+                    analyzedTypes.replace(CardType.LAND, analyzedTypes.get(CardType.LAND) + 1);
+                    break;
+                }
+            }
+        }
+        return analyzedTypes;
     }
 
     private static void initJSONS() {
@@ -134,8 +149,8 @@ public class DecklistParser {
         }
     }
 
-    private static String[] returnCardTypes(SetsEnum.Sets givenSet, int givenCode) {
-        String[] cardTypes = null;
+    private static Set<CardType> returnCardTypes(SetType givenSet, int givenCode) {
+        Set<CardType> cardTypes = null;
         switch (givenSet) {
             case M19: {
                 cardTypes = readTypes(jsonM19, givenCode);
@@ -178,7 +193,7 @@ public class DecklistParser {
         return cardTypes;
     }
 
-    private static int returnCardCMC(SetsEnum.Sets givenSet, int givenCode) {
+    private static int returnCardCMC(SetType givenSet, int givenCode) {
         int cardCMC = 0;
         switch (givenSet) {
             case M19: {
@@ -222,7 +237,7 @@ public class DecklistParser {
         return cardCMC;
     }
 
-    private static String returnCardManaCost(SetsEnum.Sets givenSet, int givenCode) {
+    private static String returnCardManaCost(SetType givenSet, int givenCode) {
         String cardManaCost = null;
         switch (givenSet) {
             case M19: {
@@ -266,8 +281,17 @@ public class DecklistParser {
         return cardManaCost;
     }
 
-    private static String[] readTypes(String givenPathToJSON, int givenCode) {
-        return readFromJSONArray(givenPathToJSON, "types", givenCode);
+    private static Set<CardType> readTypes(String givenPathToJSON, int givenCode) {
+        Set<CardType> resultTypes = new HashSet<>();
+        String[] typesFromJSON = readFromJSONArray(givenPathToJSON, "types", givenCode);
+
+        for (String currentType : typesFromJSON) {
+            //Cards in json are capitalised, while Enums should be uppercased. Gotta call toUpperCase() to avoid
+            //savage switch statement
+            resultTypes.add(CardType.valueOf(currentType.toUpperCase()));
+        }
+
+        return resultTypes;
     }
 
     private static int readCMC(String givenPathToJson, int givenCode) {
@@ -310,6 +334,7 @@ public class DecklistParser {
         } catch (FileNotFoundException e) {
             log.log(Level.SEVERE, "There is no such file.", e);
         } catch (NullPointerException e) {
+            //TODO Check for land
             log.log(Level.WARNING, "There is no such field.", e);
         }
         return "";
