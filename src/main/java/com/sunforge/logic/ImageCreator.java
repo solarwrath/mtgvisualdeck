@@ -19,8 +19,7 @@ public class ImageCreator {
 
     //TODO SEPARATE TO IMPLEMENT DRWAING SIDEBOARD TITLE AND STATS
 
-    public static void createOutput(String pathToOutput, SortedMap<Card, Integer> givenMapOfCards) {
-
+    public static Object[] createImageAndGetRows(SortedMap<Card, Integer> givenMapOfCards) {
 
         BufferedImage myPicture = new BufferedImage(3000, 3000, 1);
 
@@ -98,20 +97,24 @@ public class ImageCreator {
 
             //Saving the image
 
-            try {
+            return new Object[]{myPicture, currentRow};
+
+           /* try {
                 String savingPath = pathToCurrentDirectory + "output.jpg";
                 ImageIO.write(myPicture, "jpg", new File(savingPath));
 
                 log.info("Saved the output image!");
             } catch (IOException e) {
                 log.log(Level.SEVERE, "There is an error with outputting!", e);
-            }
+            }*/
         } catch (URISyntaxException e) {
             log.log(Level.SEVERE, "Problem with path to current dir. Probably wrong formatting", e);
         } catch (IOException e) {
             //TODO Delete this and change the current dir savepath to the given by user when everything else is done
             log.log(Level.SEVERE, "There is an error with getting current dir path!", e);
         }
+
+        return null;
     }
 
     private static int calculateX(int givenCol) {

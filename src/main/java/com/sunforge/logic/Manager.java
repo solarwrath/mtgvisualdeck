@@ -1,12 +1,13 @@
 package com.sunforge.logic;
 
+import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.logging.Logger;
 
-import static com.sunforge.logic.BoardUtils.joinBoardTypes;
 import static com.sunforge.logic.BoardUtils.getTypesFromBoard;
+import static com.sunforge.logic.BoardUtils.joinBoardTypes;
 import static com.sunforge.logic.DecklistParser.parse;
 
 public class Manager {
@@ -14,7 +15,7 @@ public class Manager {
     private static Logger log = Logger.getLogger(Manager.class.getName());
     public static void processData(String givenDeck){
 
-        //Splitting the deck into main and side boards.
+        //Splitting the deck into main and side boards. 0 is mainboard. 1 is sideboard.
         List<String> mainBoard = DeckSplitter.splitDeck(givenDeck).get(0);
         List<String> sideBoard = DeckSplitter.splitDeck(givenDeck).get(1);
 
@@ -29,6 +30,18 @@ public class Manager {
         Map<CardType, Integer> sideBoardTypes = getTypesFromBoard(parsedSideBoard);
 
         Map<CardType, Integer> finalTypes = joinBoardTypes(mainBoardTypes, sideBoardTypes);
+
+        //
+        Object[] rspMainBoard = ImageCreator.createImageAndGetRows(parsedMainBoard);
+        BufferedImage mainBoardImage = (BufferedImage)rspMainBoard[0];
+
+
+        //TODO Change this to draw sideboard
+        Object[] rspSideBoard = ImageCreator.createImageAndGetRows(parsedSideBoard);
+        BufferedImage sideBoardImage = (BufferedImage)rspSideBoard[0];
+
+        BufferedImage backgroundImage = BackgroundCreator.createBackground(Math.max((int)rspMainBoard[1], (int)rspSideBoard[1]));
+
 
         /*String pathToJARDir = null;
         try {
