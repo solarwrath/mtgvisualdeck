@@ -1,8 +1,13 @@
 package com.sunforge.logic;
 
 import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.logging.Logger;
+
+import static com.sunforge.logic.BoardUtils.joinBoardTypes;
+import static com.sunforge.logic.BoardUtils.getTypesFromBoard;
+import static com.sunforge.logic.DecklistParser.parse;
 
 public class Manager {
 
@@ -14,7 +19,16 @@ public class Manager {
         List<String> sideBoard = DeckSplitter.splitDeck(givenDeck).get(1);
 
         //TODO Need to predict the size of document
-        SortedMap<Card, Integer> parsedMainBoard = (SortedMap<Card, Integer>) DecklistParser.parse(mainBoard);
+        //Get the Map of Cards and Quantities from String lines
+        SortedMap<Card, Integer> parsedMainBoard = (SortedMap<Card, Integer>) parse(mainBoard);
+        SortedMap<Card, Integer> parsedSideBoard = (SortedMap<Card, Integer>) parse(sideBoard);
+
+        //Get board types to display. I separate the deck into two piles so need to call it for both and then join them
+
+        Map<CardType, Integer> mainBoardTypes = getTypesFromBoard(parsedMainBoard);
+        Map<CardType, Integer> sideBoardTypes = getTypesFromBoard(parsedSideBoard);
+
+        Map<CardType, Integer> finalTypes = joinBoardTypes(mainBoardTypes, sideBoardTypes);
 
         /*String pathToJARDir = null;
         try {

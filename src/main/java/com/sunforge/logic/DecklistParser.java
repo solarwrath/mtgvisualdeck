@@ -79,55 +79,6 @@ public class DecklistParser {
         return parsedCards;
     }
 
-    public static Map<CardType, Integer> getTypesFromDeck(SortedMap<Card, Integer> givenMap) {
-
-        //No inline initializing for Map in Java 8 that is the latest for JavaFX wrapper, unfortunately, so need to
-        //add items manually
-        Map<CardType, Integer> analyzedTypes = new HashMap<CardType, Integer>();
-
-        analyzedTypes.put(CardType.CREATURE, 0);
-        analyzedTypes.put(CardType.INSTANT, 0);
-        analyzedTypes.put(CardType.SORCERY, 0);
-        analyzedTypes.put(CardType.ARTIFACT, 0);
-        analyzedTypes.put(CardType.ENCHANTMENT, 0);
-        analyzedTypes.put(CardType.PLANESWALKER, 0);
-        analyzedTypes.put(CardType.LAND, 0);
-
-        for (Map.Entry<Card, Integer> currentPair : givenMap.entrySet()) {
-            for (CardType currentCardType : currentPair.getKey().getTypes()) {
-                //S
-                if (currentCardType.equals(CardType.CREATURE)) {
-                    analyzedTypes.replace(CardType.CREATURE, analyzedTypes.get(CardType.CREATURE) + 1);
-                    break;
-                }
-                if (currentCardType.equals(CardType.INSTANT)) {
-                    analyzedTypes.replace(CardType.INSTANT, analyzedTypes.get(CardType.INSTANT) + 1);
-                    break;
-                }
-                if (currentCardType.equals(CardType.SORCERY)) {
-                    analyzedTypes.replace(CardType.SORCERY, analyzedTypes.get(CardType.SORCERY) + 1);
-                    break;
-                }
-                if (currentCardType.equals(CardType.ENCHANTMENT)) {
-                    analyzedTypes.replace(CardType.ENCHANTMENT, analyzedTypes.get(CardType.ENCHANTMENT) + 1);
-                    break;
-                }
-                if (currentCardType.equals(CardType.ARTIFACT)) {
-                    analyzedTypes.replace(CardType.ARTIFACT, analyzedTypes.get(CardType.ARTIFACT) + 1);
-                    break;
-                }
-                if (currentCardType.equals(CardType.PLANESWALKER)) {
-                    analyzedTypes.replace(CardType.PLANESWALKER, analyzedTypes.get(CardType.PLANESWALKER) + 1);
-                    break;
-                }
-                if (currentCardType.equals(CardType.LAND)) {
-                    analyzedTypes.replace(CardType.LAND, analyzedTypes.get(CardType.LAND) + 1);
-                    break;
-                }
-            }
-        }
-        return analyzedTypes;
-    }
 
     private static void initJSONS() {
         String pathToJARDir;
