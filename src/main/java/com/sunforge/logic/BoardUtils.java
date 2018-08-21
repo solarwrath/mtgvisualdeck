@@ -86,4 +86,41 @@ public class BoardUtils {
 
         return currentMaxCard;
     }
+
+    public static int[] getCurve(Map<Card, Integer> givenBoard){
+        int[] manaCurve = new int[8];
+
+        for (Map.Entry<Card, Integer> currentPair : givenBoard.entrySet()) {
+            int currentCMC = currentPair.getKey().getCmc();
+            int quantityOfCard = currentPair.getValue();
+            switch(currentCMC){
+                case 0:
+                    manaCurve[0] += quantityOfCard;
+                    break;
+                case 1:
+                    manaCurve[1] += quantityOfCard;
+                    break;
+                case 2:
+                    manaCurve[2] += quantityOfCard;
+                    break;
+                case 3:
+                    manaCurve[3] += quantityOfCard;
+                    break;
+                case 4:
+                    manaCurve[4] += quantityOfCard;
+                    break;
+                case 5:
+                    manaCurve[5] += quantityOfCard;
+                    break;
+                case 6:
+                    manaCurve[6] += quantityOfCard;
+                    break;
+                default:
+                    if(currentCMC >= 7)
+                        manaCurve[7] += quantityOfCard;
+            }
+        }
+
+        return manaCurve;
+    }
 }
