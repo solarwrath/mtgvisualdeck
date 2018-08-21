@@ -74,4 +74,17 @@ public class BoardUtils {
 
         return types;
     }
+
+    private static Card findPreviewCard(Map<Card, Integer> givenBoard){
+        int maxCMC = 0;
+
+        Card currentMaxCard = null;
+        for (Map.Entry<Card, Integer> currentPair : givenBoard.entrySet()) {
+            if(currentPair.getKey().getCmc() >= maxCMC){
+                currentMaxCard = currentPair.getKey();
+            }
+        }
+
+        return currentMaxCard;
+    }
 }
