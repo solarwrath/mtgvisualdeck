@@ -33,7 +33,7 @@ public class Manager {
         BufferedImage sideBoardImage = (BufferedImage)rspSideBoard[0];
         BufferedImage backgroundImage = BackgroundCreator.createBackground(Math.max((int)rspMainBoard[1], (int)rspSideBoard[1]));
 
-        BufferedImage headerImage = HeaderCreator.createHeader(gatheredStats);
+        BufferedImage headerImage = new HeaderCreator().createHeader(gatheredStats);
 
 
         /*String pathToJARDir = null;
