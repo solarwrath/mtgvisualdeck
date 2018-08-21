@@ -1,6 +1,7 @@
 package com.sunforge.logic;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -8,12 +9,12 @@ public class Card implements Comparable<Card> {
     private String name;
     private SetType set;
     private int number;
+    private int cmc;
     private String manaCost;
+    private List<ColorType> colorIdentity;
     private Set<CardType> types;
 
     private String artist;
-    private int cmc;
-    private String[] colorIdentity;
     private String[] colors;
     private String id;
     private String imageName;
@@ -68,6 +69,14 @@ public class Card implements Comparable<Card> {
         this.manaCost = manaCost;
     }
 
+    public List<ColorType> getColorIdentity() {
+        return colorIdentity;
+    }
+
+    public void setColorIdentity(List<ColorType> colorIdentity) {
+        this.colorIdentity = colorIdentity;
+    }
+
     public Set<CardType> getTypes() {
         return types;
     }
@@ -76,18 +85,31 @@ public class Card implements Comparable<Card> {
         this.types = types;
     }
 
-    public Card(String name, SetType set, int number, int cmc, String manaCost, Set<CardType> types) {
+    public Card(String name, SetType set, int number, int cmc, String manaCost, List<ColorType> colorIdentity, Set<CardType> types) {
         this.name = name;
         this.set = set;
         this.number = number;
         this.cmc = cmc;
         this.manaCost = manaCost;
+        this.colorIdentity = colorIdentity;
         this.types = types;
     }
 
     @Override
     public String toString() {
-        return "Card object{\nName: " + name + "\nSet; " + set.toString() + "\nNumber: " + number + "\nCMC: " + cmc + "\nManaCost: " + manaCost + "\nCard types: " + Arrays.toString(types.toArray());
+
+        //Parse color identity
+
+        StringBuilder colorIdentitySB = new StringBuilder();
+        for (ColorType currentColor : colorIdentity) {
+            colorIdentitySB.append(currentColor.toString()).append(",");
+        }
+        colorIdentitySB.deleteCharAt(colorIdentity.size()-1);
+
+        return new StringBuilder("Card object{\nName: ").append(name).append("\nSet; ").append(set.toString())
+                .append("\nNumber: ").append(number).append("\nCMC: ").append(cmc).append("\nManaCost: ").append(manaCost)
+                .append("\nColor identity:").append(colorIdentitySB.toString()).append("\nCard types: ")
+                .append(Arrays.toString(types.toArray())).toString();
     }
 
     @Override
@@ -106,11 +128,11 @@ public class Card implements Comparable<Card> {
 
         //Sorting by CMC
 
-        if(this.cmc > card2.cmc){
+        if (this.cmc > card2.cmc) {
             return -1;
         }
 
-        if(this.cmc < card2.cmc){
+        if (this.cmc < card2.cmc) {
             return 1;
         }
 

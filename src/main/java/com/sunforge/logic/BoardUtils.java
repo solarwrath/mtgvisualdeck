@@ -2,10 +2,13 @@ package com.sunforge.logic;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public class BoardUtils {
 
-    public static Map<CardType, Integer> joinBoardTypes(Map<CardType, Integer> firstBoardTypes, Map<CardType, Integer> secondBoardTypes){
+    private static Logger log = Logger.getLogger(BoardUtils.class.getName());
+
+    public static Map<CardType, Integer> joinBoardTypes(Map<CardType, Integer> firstBoardTypes, Map<CardType, Integer> secondBoardTypes) {
         Map<CardType, Integer> joinedMap = createTypesMap();
 
         for (Map.Entry<CardType, Integer> currentTypePair : firstBoardTypes.entrySet()) {
@@ -15,6 +18,8 @@ public class BoardUtils {
         for (Map.Entry<CardType, Integer> currentTypePair : secondBoardTypes.entrySet()) {
             joinedMap.replace(currentTypePair.getKey(), joinedMap.get(currentTypePair.getKey()) + currentTypePair.getValue());
         }
+
+        log.info("Joined board types");
 
         return joinedMap;
     }
@@ -60,7 +65,7 @@ public class BoardUtils {
         return analyzedTypes;
     }
 
-    private static Map<CardType, Integer> createTypesMap(){
+    private static Map<CardType, Integer> createTypesMap() {
         Map<CardType, Integer> types = new HashMap<CardType, Integer>();
 
         types.put(CardType.CREATURE, 0);
@@ -74,12 +79,13 @@ public class BoardUtils {
         return types;
     }
 
-    public static Card findPreviewCard(Map<Card, Integer> givenBoard){
+    public static Card findPreviewCard(Map<Card, Integer> givenBoard) {
+        //Current logic is to find the card with maxCMC and most color specific
         int maxCMC = 0;
 
         Card currentMaxCard = null;
         for (Map.Entry<Card, Integer> currentPair : givenBoard.entrySet()) {
-            if(currentPair.getKey().getCmc() >= maxCMC){
+            if (currentPair.getKey().getCmc() >= maxCMC) {
                 currentMaxCard = currentPair.getKey();
             }
         }
@@ -87,13 +93,15 @@ public class BoardUtils {
         return currentMaxCard;
     }
 
-    public static int[] getCurve(Map<Card, Integer> givenBoard){
+    public static int[] getCurve(Map<Card, Integer> givenBoard) {
         int[] manaCurve = new int[8];
 
         for (Map.Entry<Card, Integer> currentPair : givenBoard.entrySet()) {
+
             int currentCMC = currentPair.getKey().getCmc();
             int quantityOfCard = currentPair.getValue();
-            switch(currentCMC){
+
+            switch (currentCMC) {
                 case 0:
                     manaCurve[0] += quantityOfCard;
                     break;
@@ -116,11 +124,54 @@ public class BoardUtils {
                     manaCurve[6] += quantityOfCard;
                     break;
                 default:
-                    if(currentCMC >= 7)
+                    if (currentCMC >= 7)
                         manaCurve[7] += quantityOfCard;
             }
         }
 
         return manaCurve;
+    }
+
+    public static Map<ColorType, Float> getColorPercentages(Map<Card, Integer> givenBoard) {
+        Map<ColorType, Float> resultMap = new HashMap<>();
+
+        //Array is faster than ArrayList
+        //the array stores as WUBRG
+        float[] colors = new float[]{0, 0, 0, 0, 0};
+
+        int sizeOfBoard = 0;
+        for (Map.Entry<Card, Integer> currentCardPair : givenBoard.entrySet()) {
+            sizeOfBoard += currentCardPair.getValue();
+        }
+
+        for (Map.Entry<Card, Integer> currentCardPair : givenBoard.entrySet()) {
+            if (currentCardPair.getKey().getColorIdentity() != null) {
+                for (ColorType currentColor : currentCardPair.getKey().getColorIdentity()) {
+                    if (currentColor.equals(ColorType.WHITE)) {
+                        colors[0] += currentCardPair.getValue();
+                    }
+                    if (currentColor.equals(ColorType.BLUE)) {
+                        colors[1] += currentCardPair.getValue();
+                    }
+                    if (currentColor.equals(ColorType.BLACK)) {
+                        colors[2] += currentCardPair.getValue();
+                    }
+                    if (currentColor.equals(ColorType.RED)) {
+                        colors[3] += currentCardPair.getValue();
+                    }
+                    if (currentColor.equals(ColorType.GREEN)) {
+                        colors[4] += currentCardPair.getValue();
+                    }
+                }
+            }
+        }
+
+        resultMap.put(ColorType.WHITE, colors[0] / sizeOfBoard);
+        resultMap.put(ColorType.BLUE, colors[1] / sizeOfBoard);
+        resultMap.put(ColorType.BLACK, colors[2] / sizeOfBoard);
+        resultMap.put(ColorType.RED, colors[3] / sizeOfBoard);
+        resultMap.put(ColorType.GREEN, colors[4] / sizeOfBoard);
+
+        return resultMap;
     }
 }

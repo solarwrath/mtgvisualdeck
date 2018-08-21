@@ -1,5 +1,6 @@
 package com.sunforge.logic;
 
+import java.util.List;
 import java.util.Set;
 
 public class CardBuilder {
@@ -8,6 +9,7 @@ public class CardBuilder {
     private int number;
     private int cmc;
     private String manaCost;
+    private List<ColorType> colorIdentity;
     private Set<CardType> types;
 
     public CardBuilder setName(String name) {
@@ -35,12 +37,17 @@ public class CardBuilder {
         return this;
     }
 
+    public CardBuilder setColorIdentity(List<ColorType> colorIdentity) {
+        this.colorIdentity = colorIdentity;
+        return this;
+    }
+
     public CardBuilder setTypes(Set<CardType> types) {
         this.types = types;
         return this;
     }
 
     public Card createCard() {
-        return new Card(name, set, number, cmc, manaCost, types);
+        return new Card(name, set, number, cmc, manaCost, colorIdentity, types);
     }
 }

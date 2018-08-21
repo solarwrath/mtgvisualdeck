@@ -30,11 +30,7 @@ public class DecklistParser {
     public static Map<Card, Integer> parse(List<String> listOfCards) {
         initJSONS();
         log.info("Initted json");
-
-        //TODO Create a special class to implement this. Also additional check for artifact/sorcery/instant/pw/lands
         SortedMap<Card, Integer> parsedCards = new TreeMap<>(Comparator.reverseOrder());
-
-        //TODO AKH IS BROKEN SOMEHOW
 
         int landNumber = 0;
         int artifactNumber = 0;
@@ -48,7 +44,6 @@ public class DecklistParser {
         for (String currentEntry : listOfCards) {
 
             currentEntry = currentEntry.trim();
-            //TODO Proper validation
             if (currentEntry.length() > 0) {
 
                 int firstIndexSpace = currentEntry.indexOf(" ");
@@ -59,14 +54,23 @@ public class DecklistParser {
                 String cardName = currentEntry.substring(firstIndexSpace, indexOfBracket - 1);
                 SetType cardSet = SetType.valueOf(currentEntry.substring(indexOfBracket + 1, currentEntry.indexOf(")")));
                 int cardID = Integer.parseInt(currentEntry.substring(currentEntry.lastIndexOf(" ") + 1));
-                int cardCMC = returnCardCMC(cardSet, cardID);
-                String cardManaCost = returnCardManaCost(cardSet, cardID);
                 Set<CardType> cardTypes = returnCardTypes(cardSet, cardID);
+
+                //Lands do not have this
+                List<ColorType> cardColorIdentity = null;
+                int cardCMC = -1;
+                String cardManaCost = null;
+
+                if(!cardTypes.contains(CardType.LAND)){
+                    cardColorIdentity = returnCardColorIdentity(cardSet, cardID);
+                    cardCMC = returnCardCMC(cardSet, cardID);
+                    cardManaCost = returnCardManaCost(cardSet, cardID);
+                }
 
                 log.info("Parsed the data from given card");
 
                 //Put a card object with quantity
-                parsedCards.put(new CardBuilder().setName(cardName).setSet(cardSet).setNumber(cardID).setCMC(cardCMC).setManaCost(cardManaCost).setTypes(cardTypes).createCard(), cardQuantity);
+                parsedCards.put(new CardBuilder().setName(cardName).setSet(cardSet).setNumber(cardID).setCMC(cardCMC).setManaCost(cardManaCost).setColorIdentity(cardColorIdentity).setTypes(cardTypes).createCard(), cardQuantity);
 
                 log.info("Created a pair in map");
 
@@ -74,6 +78,8 @@ public class DecklistParser {
             }
         }
 
+        //TODO AKH 210-224 card images are missing
+        //TODO Overall, aftermath is broken because its number is like XXXa and XXXb. FIX IT
         log.info("Finished consuming the data from the given decklist");
 
         return parsedCards;
@@ -142,6 +148,50 @@ public class DecklistParser {
         }
 
         return cardTypes;
+    }
+
+    private static List<ColorType> returnCardColorIdentity(SetType givenSet, int givenCode) {
+        List<ColorType> cardColorIdentity = null;
+        switch (givenSet) {
+            case M19: {
+                cardColorIdentity = readColorIdentity(jsonM19, givenCode);
+                break;
+            }
+            case DAR: {
+                cardColorIdentity = readColorIdentity(jsonDAR, givenCode);
+                break;
+            }
+            case RIX: {
+                cardColorIdentity = readColorIdentity(jsonRIX, givenCode);
+                break;
+            }
+            case XLN: {
+                cardColorIdentity = readColorIdentity(jsonXLN, givenCode - 1);
+                break;
+            }
+            case HOU: {
+                cardColorIdentity = readColorIdentity(jsonHOU, givenCode);
+                break;
+            }
+            case AKH: {
+                cardColorIdentity = readColorIdentity(jsonAKH, givenCode);
+                break;
+            }
+            case AER: {
+                cardColorIdentity = readColorIdentity(jsonAER, givenCode);
+                break;
+            }
+            case KLD: {
+                cardColorIdentity = readColorIdentity(jsonKLD, givenCode);
+                break;
+            }
+            case W17: {
+                cardColorIdentity = readColorIdentity(jsonW17, givenCode);
+                break;
+            }
+        }
+
+        return cardColorIdentity;
     }
 
     private static int returnCardCMC(SetType givenSet, int givenCode) {
@@ -245,6 +295,38 @@ public class DecklistParser {
         return resultTypes;
     }
 
+    private static List<ColorType> readColorIdentity(String givenPathToJSON, int givenCode) {
+        List<ColorType> resultColorIdentity = new ArrayList<>();
+        String[] colorIdentityFromJSON = readFromJSONArray(givenPathToJSON, "colorIdentity", givenCode);
+
+        for (String currentColor : colorIdentityFromJSON) {
+            //I don't wanna store colors as Strings and for them to be of nice name, I need the cases instead of
+            //ColorTYpe.valueOf()
+            switch (currentColor) {
+                case "W":
+                    resultColorIdentity.add(ColorType.WHITE);
+                    break;
+                case "U":
+                    resultColorIdentity.add(ColorType.BLUE);
+                    break;
+                case "R":
+                    resultColorIdentity.add(ColorType.RED);
+                    break;
+                case "B":
+                    resultColorIdentity.add(ColorType.BLACK);
+                    break;
+                case "G":
+                    resultColorIdentity.add(ColorType.GREEN);
+                    break;
+                default:
+                    log.severe("There is no such color identity! json:" + givenPathToJSON + ". Code: " + givenCode);
+                    break;
+            }
+        }
+
+        return resultColorIdentity;
+    }
+
     private static int readCMC(String givenPathToJson, int givenCode) {
         return readFromJSONPrimitiveInteger(givenPathToJson, "cmc", givenCode);
     }
@@ -270,7 +352,13 @@ public class DecklistParser {
         } catch (FileNotFoundException e) {
             log.log(Level.SEVERE, "There is no such file.", e);
             e.printStackTrace();
+        } catch (NullPointerException e){
+            //Lands do not have colorIdentity
+            if(!fieldName.equals("colorIdentity")){
+                log.log(Level.SEVERE, "Color identity is missing.", e);
+            }
         }
+
         return new String[]{};
     }
 
@@ -288,7 +376,7 @@ public class DecklistParser {
 
             //Checking if trying to get manaCost of land, because that is not an appropriate error to log
             //Only for manaCost because now using this method only to get it. Later expand if needed, which is unlikely
-            if(!(readTypes(givenPathToJSON, givenCode).contains(CardType.LAND) && fieldName.equals("manaCost"))){
+            if (!(readTypes(givenPathToJSON, givenCode).contains(CardType.LAND) && fieldName.equals("manaCost"))) {
                 log.log(Level.WARNING, "There is no such field.", e);
             }
         }

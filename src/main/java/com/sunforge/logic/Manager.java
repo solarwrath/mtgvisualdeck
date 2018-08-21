@@ -22,7 +22,7 @@ public class Manager {
         SortedMap<Card, Integer> parsedSideBoard = (SortedMap<Card, Integer>) parse(sideBoard);
 
         //Get board types to display. I separate the deck into two piles so need to call it for both and then join them
-        Stats gatheredStats = StatsCreator.gatherStats(parsedMainBoard, parsedSideBoard);
+        Stats gatheredStats = StatsCreator.gatherStats(givenTitle, givenAuthor, parsedMainBoard, parsedSideBoard);
 
         //
         Object[] rspMainBoard = ImageCreator.createImageAndGetRows(parsedMainBoard);
@@ -33,7 +33,7 @@ public class Manager {
         BufferedImage sideBoardImage = (BufferedImage)rspSideBoard[0];
         BufferedImage backgroundImage = BackgroundCreator.createBackground(Math.max((int)rspMainBoard[1], (int)rspSideBoard[1]));
 
-        BufferedImage headerImage = HeaderCreator.createHeader(BoardUtils.findPreviewCard(parsedMainBoard), givenTitle, givenAuthor, null);
+        BufferedImage headerImage = HeaderCreator.createHeader(gatheredStats);
 
 
         /*String pathToJARDir = null;

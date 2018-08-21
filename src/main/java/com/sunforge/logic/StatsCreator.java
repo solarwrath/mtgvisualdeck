@@ -12,11 +12,12 @@ public class StatsCreator {
         Map<CardType, Integer> sideBoardTypes = getTypesFromBoard(givenSideBoard);
         Map<CardType, Integer> joinedBoardTypes = joinBoardTypes(mainBoardTypes, sideBoardTypes);
 
+        Map<ColorType, Float> colorPercentages = getColorPercentages(givenMainBoard);
+
         int[] manaCurve = getCurve(givenMainBoard);
 
-        //TODO Mana Curve and Mana Percentage
-
         return new StatsBuilder().setPreviewCard(previewCard).setTitle(givenTitle).setAuthor(givenAuthor)
-                .setTypes(joinedBoardTypes).setManaCurve(manaCurve).createStats();
+                .setManaPercentage(colorPercentages).setTypes(joinedBoardTypes).setManaCurve(manaCurve)
+                .createStats();
     }
 }
