@@ -2,7 +2,6 @@ package com.sunforge.logic;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.SortedMap;
 
 public class BoardUtils {
 
@@ -20,7 +19,7 @@ public class BoardUtils {
         return joinedMap;
     }
 
-    public static Map<CardType, Integer> getTypesFromBoard(SortedMap<Card, Integer> givenMap) {
+    public static Map<CardType, Integer> getTypesFromBoard(Map<Card, Integer> givenMap) {
 
         //No inline initializing for Map in Java 8 that is the latest for JavaFX wrapper, unfortunately, so need to
         //add items manually
@@ -75,7 +74,7 @@ public class BoardUtils {
         return types;
     }
 
-    private static Card findPreviewCard(Map<Card, Integer> givenBoard){
+    public static Card findPreviewCard(Map<Card, Integer> givenBoard){
         int maxCMC = 0;
 
         Card currentMaxCard = null;

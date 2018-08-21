@@ -2,12 +2,9 @@ package com.sunforge.logic;
 
 import java.awt.image.BufferedImage;
 import java.util.List;
-import java.util.Map;
 import java.util.SortedMap;
 import java.util.logging.Logger;
 
-import static com.sunforge.logic.BoardUtils.getTypesFromBoard;
-import static com.sunforge.logic.BoardUtils.joinBoardTypes;
 import static com.sunforge.logic.DecklistParser.parse;
 
 public class Manager {
@@ -25,22 +22,18 @@ public class Manager {
         SortedMap<Card, Integer> parsedSideBoard = (SortedMap<Card, Integer>) parse(sideBoard);
 
         //Get board types to display. I separate the deck into two piles so need to call it for both and then join them
-
-        Map<CardType, Integer> mainBoardTypes = getTypesFromBoard(parsedMainBoard);
-        Map<CardType, Integer> sideBoardTypes = getTypesFromBoard(parsedSideBoard);
-
-        Map<CardType, Integer> finalTypes = joinBoardTypes(mainBoardTypes, sideBoardTypes);
+        Stats gatheredStats = StatsCreator.gatherStats(parsedMainBoard, parsedSideBoard);
 
         //
         Object[] rspMainBoard = ImageCreator.createImageAndGetRows(parsedMainBoard);
         BufferedImage mainBoardImage = (BufferedImage)rspMainBoard[0];
 
-
         //TODO Change this to draw sideboard
         Object[] rspSideBoard = ImageCreator.createImageAndGetRows(parsedSideBoard);
         BufferedImage sideBoardImage = (BufferedImage)rspSideBoard[0];
-
         BufferedImage backgroundImage = BackgroundCreator.createBackground(Math.max((int)rspMainBoard[1], (int)rspSideBoard[1]));
+
+        BufferedImage headerImage = HeaderCreator.createHeader(BoardUtils.findPreviewCard(parsedMainBoard), givenTitle, givenAuthor, null);
 
 
         /*String pathToJARDir = null;
