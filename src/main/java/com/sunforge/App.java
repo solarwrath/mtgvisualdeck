@@ -10,6 +10,8 @@ import javafx.stage.Stage;
  * Hello world!
  */
 public class App extends Application {
+    public static String pathToCurrentDirectory;
+
     private static Stage mainStage;
 
     public static Stage getMainStage() {
@@ -33,5 +35,8 @@ public class App extends Application {
         mainStage.setTitle("MtG: Deck Visualizer");
         mainStage.setScene(new Scene(root));
         mainStage.show();
+
+        pathToCurrentDirectory = App.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
+        pathToCurrentDirectory = pathToCurrentDirectory.substring(1).substring(0, pathToCurrentDirectory.lastIndexOf("/"));
     }
 }
